@@ -79,3 +79,12 @@
 .lucky-panel .dest b{color:var(--link)}
 
 .res-footer{background:var(--bg-footer);border-top:1px solid var(--border-soft);margin-top:auto}
+
+/* ---------- loading skeletons (server fetch in progress) ---------- */
+.skel-line{height:12px;border-radius:6px;margin:10px 0;
+  background:linear-gradient(90deg,var(--bg-soft) 25%,var(--border-light) 50%,var(--bg-soft) 75%);
+  background-size:200% 100%;animation:skel-shimmer 1.1s linear infinite}
+.skel-line.big{height:18px}
+.result.skel{pointer-events:none}
+.img-card.skel{pointer-events:none;min-height:150px}
+@keyframes skel-shimmer{to{background-position:-200% 0}}
