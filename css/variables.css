@@ -1,0 +1,44 @@
+/* ============ design tokens (light + dark) ============ */
+:root{
+  --bg:#ffffff;
+  --bg-soft:#f8f9fa;
+  --bg-footer:#f2f2f2;
+  --bg-card:#ffffff;
+  --text:#202124;
+  --text-2:#4d5156;
+  --text-3:#5f6368;
+  --text-4:#70757a;
+  --link:#1a0dab;
+  --link-visited:#660099;
+  --accent:#1a73e8;
+  --border:#dfe1e5;
+  --border-soft:#dadce0;
+  --border-light:#ebebeb;
+  --icon:#9aa0a6;
+  --icon-dark:#5f6368;
+  --shadow:0 1px 6px rgba(32,33,36,.28);
+  --shadow-sm:0 2px 5px 1px rgba(64,60,67,.08);
+  --hover:#f1f3f4;
+  --star:#fbbc05;
+}
+body.dark{
+  --bg:#202124;
+  --bg-soft:#303134;
+  --bg-footer:#171717;
+  --bg-card:#303134;
+  --text:#e8eaed;
+  --text-2:#bdc1c6;
+  --text-3:#9aa0a6;
+  --text-4:#9aa0a6;
+  --link:#8ab4f8;
+  --link-visited:#c58af9;
+  --accent:#8ab4f8;
+  --border:#5f6368;
+  --border-soft:#3c4043;
+  --border-light:#3c4043;
+  --icon:#9aa0a6;
+  --icon-dark:#e8eaed;
+  --shadow:0 1px 6px rgba(0,0,0,.55);
+  --shadow-sm:0 2px 5px 1px rgba(0,0,0,.4);
+  --hover:#3c4043;
+}
