@@ -32,6 +32,18 @@ G.store = {
     this.history = [{ q, t: Date.now() },
       ...this.history.filter(h => h.q.toLowerCase() !== q.toLowerCase())].slice(0, 20);
     this.saveHistory();
+    // persist server-side too (fire-and-forget; works offline regardless)
+    try { G.Api.pushHistory(q).catch(() => {}); } catch (e) {}
+  },
+  /** pull the authoritative history from the backend (per-client, no login) */
+  async syncHistory(){
+    try {
+      const r = await G.Api.history();
+      if (r && Array.isArray(r.history) && r.history.length){
+        this.history = r.history.slice(0, 20);
+        this.saveHistory();
+      }
+    } catch (e) { /* offline — keep local */ }
   },
   clearHistory(){
     this.history = [];
