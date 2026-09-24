@@ -109,8 +109,9 @@ function json(status, obj) {
 
 /* Netlify handler: builds the blob store, delegates to the app. */
 exports.handler = async function (event) {
+  try { const _b = require("@netlify/blobs"); const _c = JSON.parse(Buffer.from(event.blobs, "base64").toString()); _b.setEnvironmentContext({ siteID: event.headers["x-nf-site-id"], token: _c.token, apiURL: "https://api.netlify.com" }); } catch (e) { /* not on Netlify: local tests */ }
   const { getStore } = require('@netlify/blobs');
-  const store = getStore({ name: 'google', consistency: 'strong' });
+  const store = getStore('google');
   const app = createApp(store);
 
   let path = event.path || '/';
