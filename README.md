@@ -1,5 +1,8 @@
 # Google Clone — real search backend
 
+
+**Live demo:** [https://ozrehan-google-clone.netlify.app](https://ozrehan-google-clone.netlify.app)
+
 A Google Search clone with a **real server-side backend**: vanilla HTML/CSS/JS
 frontend, Netlify Function API, Netlify Blobs persistence.
 
