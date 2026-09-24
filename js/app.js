@@ -125,6 +125,7 @@ G.App = (function(){
 
   function init(){
     G.store.load();
+    G.store.syncHistory().catch(() => {}); // pull server history (no login), non-blocking
     applyTheme();
     G.Homepage.render();
     renderResultsHeader();
