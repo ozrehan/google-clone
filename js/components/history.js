@@ -1,10 +1,20 @@
 'use strict';
-/* components/history.js — search history page */
+/* components/history.js — search history page (server-persisted per client) */
 window.G = window.G || {};
 
 G.History = {
-  render(){
-    const items = G.store.history;
+  async render(){
+    // pull the authoritative list from the backend; fall back to local copy offline
+    let items = G.store.history;
+    try {
+      const r = await G.Api.history();
+      if (Array.isArray(r.history)){
+        items = r.history;
+        G.store.history = r.history.slice(0, 20);
+        G.store.saveHistory();
+      }
+    } catch (e) { /* offline — use local */ }
+
     G.dom.$('historyView').innerHTML =
     '<div class="page-view"><div class="page-head">' +
       '<button class="icon-btn" id="histBack" title="Back">' + G.dom.icon('arrow', 'sm') + '</button>' +
@@ -22,7 +32,8 @@ G.History = {
 
     G.dom.$('histBack').addEventListener('click', () => G.App.backFromPage());
     const clear = G.dom.$('histClear');
-    if (clear) clear.addEventListener('click', () => {
+    if (clear) clear.addEventListener('click', async () => {
+      try { await G.Api.clearHistory(); } catch (e) { /* offline */ }
       G.store.clearHistory();
       G.History.render();
       G.toast('Search history cleared');
