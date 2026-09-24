@@ -1,0 +1,9 @@
+# Netlify config: serverless search API + static frontend.
+[functions]
+  directory = "netlify/functions"
+
+# Map /api/* → the single api function (manual routing inside api.js)
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/api/:splat"
+  status = 200
