@@ -27,8 +27,26 @@ G.Tabs = (function(){
     G.App.renderTab();
   }
 
-  /* ---------- images ---------- */
-  function renderImages(q){
+  /* ---------- images (server index → picsum-seeded thumbnails) ---------- */
+  function imgSkeleton(){
+    let h = '<div class="stats skel-line" style="width:200px"></div><div class="img-grid">';
+    for (let i = 0; i < 12; i++)
+      h += '<div class="img-card skel"><div class="skel-line big" style="height:150px;margin:0"></div></div>';
+    return h + '</div>';
+  }
+
+  function wireLightbox(main){
+    main.onclick = e => {
+      const c = e.target.closest('.img-card');
+      if (!c || !c.dataset.full) return;
+      G.dom.$('lightboxImg').src = c.dataset.full;
+      G.dom.$('lightboxCap').textContent = c.dataset.cap;
+      G.dom.$('imgOverlay').classList.add('show');
+    };
+  }
+
+  /** legacy client-side image grid (offline fallback) */
+  function clientImages(q, main){
     const slug = G.fmt.slugify(q);
     const rnd = G.mulberry32(G.hashStr(q + '|img'));
     let h = '<div class="stats">About ' + G.fmt.num(Math.floor(50000 + rnd() * 900000)) +
@@ -40,14 +58,34 @@ G.Tabs = (function(){
         '<img src="https://picsum.photos/seed/' + seed + '/300/200" alt="' + esc(q) + '" loading="lazy">' +
         '<div class="cap">' + esc(G.fmt.titleCase(q)) + ' — photo ' + (i + 1) + '</div></div>';
     }
-    G.dom.$('resMain').innerHTML = h + '</div>';
-    G.dom.$('resMain').onclick = e => {
-      const c = e.target.closest('.img-card');
-      if (!c) return;
-      G.dom.$('lightboxImg').src = c.dataset.full;
-      G.dom.$('lightboxCap').textContent = c.dataset.cap;
-      G.dom.$('imgOverlay').classList.add('show');
-    };
+    main.innerHTML = h + '</div>';
+    wireLightbox(main);
+  }
+
+  async function renderImages(q){
+    const main = G.dom.$('resMain');
+    main.innerHTML = imgSkeleton();
+    G.dom.$('resSide').innerHTML = '';
+    try {
+      const api = await G.Api.search(q, { tab: 'images', start: 0, perPage: 24 });
+      if (!api.results.length) throw new Error('empty');
+      let h = '<div class="stats">About ' + G.fmt.num(api.count) +
+        ' image results (' + api.secs + ' seconds)</div><div class="img-grid">';
+      for (const r of api.results){
+        const img = r.img || {
+          thumb: 'https://picsum.photos/seed/' + G.fmt.slugify(r.title) + '/300/200',
+          full: 'https://picsum.photos/seed/' + G.fmt.slugify(r.title) + '/900/600',
+          cap: r.title,
+        };
+        h += '<div class="img-card" data-full="' + img.full + '" data-cap="' + esc(img.cap) + '">' +
+          '<img src="' + img.thumb + '" alt="' + esc(r.title) + '" loading="lazy">' +
+          '<div class="cap">' + G.dom.boldQ(r.title, q) + '</div></div>';
+      }
+      main.innerHTML = h + '</div>';
+      wireLightbox(main);
+    } catch (e) {
+      clientImages(q, main); // offline: legacy generated grid
+    }
   }
 
   /* ---------- videos ---------- */
@@ -78,9 +116,11 @@ G.Tabs = (function(){
     main.onclick = e => { const c = e.target.closest('[data-fake]'); if (c) G.fake(c.dataset.fake); };
   }
 
-  /* ---------- news (with topic chips) ---------- */
+  /* ---------- news (server index; topic chips filter server-side) ---------- */
   const CHIPS = [['top', 'Top stories'], ['tech', 'Tech'], ['science', 'Science'], ['sports', 'Sports'], ['world', 'World']];
-  function renderNews(q){
+
+  /** legacy client-side news list (offline fallback) */
+  function clientNews(q, main){
     const chip = G.store.newsChip;
     let h = '<div class="news-chips">' + CHIPS.map(([id, label]) =>
       '<button class="chip' + (chip === id ? ' active' : '') + '" data-chip="' + id + '">' + label + '</button>').join('') + '</div>';
@@ -93,14 +133,47 @@ G.Tabs = (function(){
       '<div><div class="news-src">' + esc(n.source) + '<span class="news-time"> · ' + esc(n.time) + '</span></div>' +
       '<a class="res-title" style="font-size:18px" href="#" onclick="return false">' + G.dom.boldQ(n.title, q) + '</a>' +
       '<div class="res-snip">' + G.dom.boldQ(n.snippet, q) + '</div></div></div>').join('');
-    const main = G.dom.$('resMain');
     main.innerHTML = h;
     main.onclick = e => {
       const c = e.target.closest('[data-chip]');
-      if (c){ G.store.newsChip = c.dataset.chip; renderNews(q); window.scrollTo(0, 0); return; }
+      if (c){ G.store.newsChip = c.dataset.chip; clientNews(q, main); window.scrollTo(0, 0); return; }
       const f = e.target.closest('[data-fake]');
       if (f){ e.preventDefault(); G.fake(f.dataset.fake); }
     };
+  }
+
+  function newsCardHTML(n, q){
+    return '<div class="news-card" data-fake="' + esc(n.source) + '">' +
+      '<img class="news-thumb" src="https://picsum.photos/seed/' + n.seed + '/240/160" alt="" loading="lazy">' +
+      '<div><div class="news-src">' + esc(n.source) + '<span class="news-time"> · ' + esc(n.time) + '</span></div>' +
+      '<a class="res-title" style="font-size:18px" href="#" onclick="return false">' + G.dom.boldQ(n.title, q) + '</a>' +
+      '<div class="res-snip">' + G.dom.boldQ(n.snippet, q) + '</div></div></div>';
+  }
+
+  async function renderNews(q){
+    const chip = G.store.newsChip;
+    const main = G.dom.$('resMain');
+    main.innerHTML = '<div class="stats skel-line" style="width:200px"></div>' +
+      '<div class="result skel"><div class="skel-line big" style="width:70%"></div>' +
+      '<div class="skel-line" style="width:95%"></div><div class="skel-line" style="width:80%"></div></div>';
+    try {
+      const api = await G.Api.search(q, { tab: 'news', start: 0, perPage: 24, chip });
+      let h = '<div class="news-chips">' + CHIPS.map(([id, label]) =>
+        '<button class="chip' + (chip === id ? ' active' : '') + '" data-chip="' + id + '">' + label + '</button>').join('') + '</div>';
+      h += '<div class="stats">About ' + G.fmt.num(api.count) + ' news results (' + api.secs + ' seconds)</div>';
+      h += api.results.map(n =>
+        newsCardHTML({ source: n.source, time: n.time, title: n.title, snippet: n.snippet, seed: n.seed }, q)
+      ).join('');
+      main.innerHTML = h;
+      main.onclick = e => {
+        const c = e.target.closest('[data-chip]');
+        if (c){ G.store.newsChip = c.dataset.chip; renderNews(q); window.scrollTo(0, 0); return; }
+        const f = e.target.closest('[data-fake]');
+        if (f){ e.preventDefault(); G.fake(f.dataset.fake); }
+      };
+    } catch (e) {
+      clientNews(q, main); // offline: legacy list
+    }
   }
 
   /* ---------- maps placeholder ---------- */
