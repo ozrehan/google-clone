@@ -44,14 +44,27 @@ G.Results = (function(){
       '<div class="paa-a">' + esc(p.a) + '</div></div>').join('') + '</div>';
   }
 
-  function render(){
+  function skeletonHTML(perPage){
+    let h = '<div class="stats skel-line" style="width:220px"></div>';
+    for (let i = 0; i < Math.min(perPage, 6); i++)
+      h += '<div class="result skel"><div class="skel-line" style="width:34%"></div>' +
+        '<div class="skel-line big" style="width:84%"></div>' +
+        '<div class="skel-line" style="width:96%"></div>' +
+        '<div class="skel-line" style="width:68%"></div></div>';
+    return h;
+  }
+
+  async function render(){
     const q = G.store.q;
     const perPage = G.store.settings.perPage;
-    const res = G.Engine.search(q, G.store.page, perPage);
+    // Google-style loading state while the server ranks the query
+    G.dom.$('resMain').innerHTML = skeletonHTML(perPage);
+    G.dom.$('resSide').innerHTML = '';
+
+    const res = await G.Engine.search(q, G.store.page, perPage);
     G.store.page = res.page;
 
-    let list = res.results;
-    if (res.fallback) list = G.Engine.fallbackResults(q, res.page, perPage);
+    const list = res.results;
 
     let h = '<div class="stats">About ' + G.fmt.num(res.count) + ' results (' + res.secs + ' seconds)</div>';
 
@@ -59,8 +72,10 @@ G.Results = (function(){
       h += '<div class="didyoumean">Did you mean: <a data-correct="' + esc(res.didYouMean) + '">' +
         esc(res.didYouMean) + '</a></div>';
     }
-    if (res.fallback){
-      h += '<div class="didyoumean" style="font-size:13px;color:var(--text-4)">No index matches — showing generated results for &ldquo;' +
+    if (res.offline){
+      h += '<div class="didyoumean" style="font-size:13px;color:var(--text-4)">Offline mode &mdash; searched the built-in index</div>';
+    } else if (res.fallback){
+      h += '<div class="didyoumean" style="font-size:13px;color:var(--text-4)">No index matches &mdash; showing generated results for &ldquo;' +
         esc(q) + '&rdquo;</div>';
     }
 
@@ -74,7 +89,7 @@ G.Results = (function(){
     h += pagerHTML(res.totalPages, res.page);
 
     G.dom.$('resMain').innerHTML = h;
-    G.dom.$('resSide').innerHTML = G.Knowledge.html(q);
+    G.dom.$('resSide').innerHTML = G.Knowledge.panelHTML(res.knowledge, q);
 
     // wire interactions (delegation)
     const main = G.dom.$('resMain');
