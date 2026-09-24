@@ -88,15 +88,20 @@ G.Knowledge = (function(){
   }
 
   function html(q){
-    const k = lookup(q) || generic(q);
+    return panelHTML(lookup(q), q);
+  }
+
+  /** render a knowledge object (from the API, or lookup()) — null → generic */
+  function panelHTML(k, q){
+    const ent = k || generic(q);
     const esc = G.dom.esc;
     return '<div class="kcard">' +
-      '<img class="kimg" src="https://picsum.photos/seed/' + k.seed + '/680/360" alt="' + esc(q) + '" loading="lazy">' +
-      '<div class="kcard-body"><h2>' + esc(k.title) + '</h2><div class="sub">' + esc(k.sub) + '</div>' +
-      '<p>' + esc(k.desc) + '</p>' +
-      k.facts.map(f => '<div class="kfact"><span class="k">' + esc(f[0]) + ':</span><span class="v">' + esc(f[1]) + '</span></div>').join('') +
+      '<img class="kimg" src="https://picsum.photos/seed/' + ent.seed + '/680/360" alt="' + esc(q) + '" loading="lazy">' +
+      '<div class="kcard-body"><h2>' + esc(ent.title) + '</h2><div class="sub">' + esc(ent.sub) + '</div>' +
+      '<p>' + esc(ent.desc) + '</p>' +
+      ent.facts.map(f => '<div class="kfact"><span class="k">' + esc(f[0]) + ':</span><span class="v">' + esc(f[1]) + '</span></div>').join('') +
       '</div></div>';
   }
 
-  return { lookup, html };
+  return { lookup, html, panelHTML };
 })();
