@@ -4,596 +4,89 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Google</title>
-<style>
-/* ============ base ============ */
-*{margin:0;padding:0;box-sizing:border-box}
-html,body{height:100%}
-body{font-family:Arial,Helvetica,sans-serif;color:#202124;background:#fff;font-size:14px}
-a{text-decoration:none}
-button{font-family:Arial,Helvetica,sans-serif}
-
-/* ============ Google wordmark (span-built, official colors) ============ */
-.wordmark{font-weight:500;letter-spacing:-0.05em;user-select:none;white-space:nowrap}
-.wordmark .b{color:#4285F4}.wordmark .r{color:#EA4335}
-.wordmark .y{color:#FBBC05}.wordmark .g{color:#34A853}
-.wordmark.big{font-size:92px;line-height:1}
-.wordmark.small{font-size:30px;cursor:pointer}
-
-/* ============ HOME VIEW ============ */
-#homeView{min-height:100vh;display:flex;flex-direction:column}
-.topbar{display:flex;justify-content:flex-end;align-items:center;gap:18px;padding:14px 24px;font-size:13px}
-.topbar a{color:#1f1f1f}
-.topbar a:hover{text-decoration:underline}
-.apps-icon{width:24px;height:24px;cursor:pointer;display:grid;grid-template-columns:repeat(3,1fr);gap:2px;padding:2px}
-.apps-icon span{background:#5f6368;border-radius:50%;width:5px;height:5px}
-.avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#8e24aa,#3949ab);
-  color:#fff;display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer}
-.hero{flex:1;display:flex;flex-direction:column;align-items:center;padding-top:8vh}
-.search-wrap{position:relative;width:min(584px,92vw);margin-top:28px}
-.search-box{display:flex;align-items:center;height:46px;border:1px solid #dfe1e5;border-radius:24px;
-  padding:0 8px 0 16px;background:#fff;transition:box-shadow .15s}
-.search-box:hover{box-shadow:0 1px 6px rgba(32,33,36,.28);border-color:transparent}
-.search-box.focused{box-shadow:0 1px 6px rgba(32,33,36,.28);border-color:transparent}
-.search-box svg{flex:none}
-.search-box input{flex:1;border:none;outline:none;font-size:16px;margin:0 12px;color:#202124;background:transparent}
-.search-box input::placeholder{color:#9aa0a6}
-.icon-btn{background:none;border:none;cursor:pointer;padding:8px;display:flex;align-items:center}
-.home-buttons{display:flex;gap:12px;margin-top:28px}
-.btn{background:#f8f9fa;border:1px solid #f8f9fa;border-radius:4px;color:#3c4043;font-size:14px;
-  padding:0 16px;height:36px;cursor:pointer}
-.btn:hover{box-shadow:0 1px 1px rgba(0,0,0,.1);border:1px solid #dadce0;color:#202124}
-/* shake animation for empty search */
-@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-10px)}
-  40%{transform:translateX(10px)}60%{transform:translateX(-6px)}80%{transform:translateX(6px)}}
-.shake{animation:shake .4s}
-/* suggestions / recent dropdown */
-.suggest{position:absolute;top:50px;left:0;right:0;background:#fff;border-radius:0 0 24px 24px;
-  box-shadow:0 4px 12px rgba(32,33,36,.28);padding:6px 0 12px;display:none;z-index:50;overflow:hidden}
-.search-box.open{border-radius:24px 24px 0 0}
-.search-box.open + .suggest{display:block}
-.res-box.open{border-radius:24px 24px 0 0}
-.suggest-row{display:flex;align-items:center;gap:14px;padding:9px 20px;cursor:pointer;font-size:16px;color:#212121}
-.suggest-row:hover{background:#f1f3f4}
-.suggest-row .lbl{font-size:12px;color:#70757a;margin-left:auto}
-.suggest-row.recent svg{stroke:#9aa0a6}
-.footer{margin-top:auto;background:#f2f2f2;border-top:1px solid #dadce0}
-.footer-inner{display:flex;justify-content:space-between;flex-wrap:wrap;padding:0 20px}
-.footer a{color:#70757a;font-size:14px;padding:15px;display:inline-block}
-.footer a:hover{text-decoration:underline}
-
-/* ============ RESULTS VIEW ============ */
-#resultsView{display:none;min-height:100vh;flex-direction:column}
-.res-header{display:flex;align-items:center;gap:32px;padding:20px 28px 0}
-.res-search{flex:1;max-width:690px;position:relative}
-.res-box{display:flex;align-items:center;height:44px;border:1px solid #dfe1e5;border-radius:24px;
-  padding:0 6px 0 18px;box-shadow:0 2px 5px 1px rgba(64,60,67,.08)}
-.res-box:hover{box-shadow:0 2px 8px 1px rgba(64,60,67,.18)}
-.res-box input{flex:1;border:none;outline:none;font-size:16px;margin:0 10px;color:#202124}
-.res-icons{display:flex;align-items:center;gap:2px}
-.clear-x{font-size:20px;color:#70757a;background:none;border:none;cursor:pointer;padding:6px 8px;line-height:1}
-.tabs{display:flex;gap:4px;padding:0 28px;margin-top:14px;border-bottom:1px solid #dadce0;font-size:13px}
-.tab{padding:0 12px 12px;color:#5f6368;cursor:pointer;display:flex;align-items:center;gap:6px;border-bottom:3px solid transparent;margin-bottom:-1px}
-.tab.active{color:#1a73e8;border-bottom-color:#1a73e8}
-.tab:hover{color:#1a73e8}
-.res-body{display:flex;gap:40px;padding:0 28px;max-width:1300px}
-.res-main{flex:1;max-width:650px;min-width:0}
-.res-side{width:340px;flex:none;padding-top:20px}
-@media(max-width:1000px){.res-side{display:none}}
-.stats{color:#70757a;font-size:14px;padding:12px 0 4px}
-.result{margin:26px 0}
-.res-site{display:flex;align-items:center;gap:10px;margin-bottom:6px}
-.fav{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;
-  color:#fff;font-size:14px;font-weight:bold;background:#8ab4f8;border:1px solid #dadce0;flex:none}
-.res-site .name{font-size:14px;color:#202124}
-.res-site .url{font-size:12px;color:#5f6368}
-.res-title{font-size:20px;line-height:1.3;display:block;margin:4px 0}
-.res-title:link{color:#1a0dab}.res-title:visited{color:#660099}
-.res-title:hover{text-decoration:underline}
-.res-snip{color:#4d5156;line-height:1.58;font-size:14px}
-.res-snip b{color:#202124}
-/* people also ask */
-.paa{margin:28px 0;border-top:1px solid #dadce0}
-.paa h2{font-size:22px;font-weight:400;padding:14px 0}
-.paa-row{border-bottom:1px solid #dadce0}
-.paa-q{display:flex;justify-content:space-between;align-items:center;padding:14px 4px;cursor:pointer;font-size:16px;color:#202124}
-.paa-q:hover{color:#1a0dab}
-.paa-a{display:none;padding:4px 4px 16px;color:#4d5156;line-height:1.6;font-size:14px}
-.paa-row.open .paa-a{display:block}
-.paa-row.open .chev{transform:rotate(180deg)}
-.chev{transition:transform .2s;color:#70757a}
-/* knowledge card */
-.kcard{border:1px solid #dadce0;border-radius:8px;overflow:hidden}
-.kcard img.kimg{width:100%;height:180px;object-fit:cover;display:block}
-.kcard-body{padding:16px}
-.kcard h2{font-size:28px;font-weight:400}
-.kcard .sub{color:#70757a;font-size:14px;margin:4px 0 12px}
-.kcard p{font-size:14px;line-height:1.6;color:#202124}
-.kfact{display:flex;gap:10px;margin-top:12px;font-size:14px}
-.kfact .k{color:#202124;font-weight:bold;min-width:110px}
-.kfact .v{color:#4d5156}
-/* related searches */
-.related{margin:32px 0}
-.related h3{font-size:20px;font-weight:400;margin-bottom:14px}
-.related-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px 24px}
-.related a{color:#1a0dab;font-size:15px;padding:7px 0;display:block}
-.related a:hover{text-decoration:underline}
-.related a b{font-weight:normal}
-/* pagination: Goooooooooogle */
-.pager{display:flex;justify-content:center;margin:36px 0 60px;user-select:none}
-.pg{display:flex;flex-direction:column;align-items:center;cursor:pointer;margin:0 1px}
-.pg .gl{font-size:34px;font-weight:500;letter-spacing:-2px}
-.pg .n{font-size:13px;color:#1a0dab;margin-top:4px}
-.pg.cur .n{color:#ea4335;font-weight:bold;cursor:default}
-.pg:not(.cur):hover .n{text-decoration:underline}
-/* images tab */
-.img-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;padding:20px 0 60px}
-.img-card{cursor:pointer;border-radius:8px;overflow:hidden;background:#f8f9fa}
-.img-card img{width:100%;height:140px;object-fit:cover;display:block;transition:transform .2s}
-.img-card:hover img{transform:scale(1.05)}
-.img-card .cap{font-size:12px;color:#5f6368;padding:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-/* videos tab */
-.vid-card{display:flex;gap:16px;margin:24px 0;cursor:pointer}
-.vid-thumb{position:relative;flex:none;width:220px}
-.vid-thumb img{width:220px;height:124px;object-fit:cover;border-radius:8px;display:block}
-.vid-dur{position:absolute;bottom:6px;right:6px;background:rgba(0,0,0,.8);color:#fff;font-size:12px;
-  padding:2px 6px;border-radius:4px}
-.vid-title{font-size:18px;color:#1a0dab;margin-bottom:6px}
-.vid-card:hover .vid-title{text-decoration:underline}
-.vid-meta{font-size:13px;color:#70757a;line-height:1.6}
-/* news tab */
-.news-card{margin:24px 0;padding-bottom:20px;border-bottom:1px solid #ebebeb}
-.news-src{display:flex;align-items:center;gap:8px;font-size:13px;color:#5f6368;margin-bottom:6px}
-.news-time{color:#70757a}
-/* toast + overlays */
-#toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:#323232;color:#fff;
-  padding:12px 24px;border-radius:8px;font-size:14px;display:none;z-index:200}
-.overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:center;
-  justify-content:center;z-index:100;padding:20px}
-.overlay.show{display:flex}
-.lucky-panel{background:#fff;border-radius:16px;max-width:520px;width:100%;padding:36px;text-align:center;
-  box-shadow:0 8px 40px rgba(0,0,0,.3);animation:pop .35s}
-@keyframes pop{from{transform:scale(.85);opacity:0}to{transform:scale(1);opacity:1}}
-.lucky-panel .clover{font-size:64px}
-.lucky-panel h2{font-size:26px;margin:12px 0;font-weight:400}
-.lucky-panel p{color:#5f6368;line-height:1.6;margin-bottom:8px}
-.lucky-panel .dest{margin:18px 0;padding:14px;background:#f8f9fa;border-radius:8px;font-size:15px}
-.lucky-panel .dest b{color:#1a0dab}
-.lightbox-img{max-width:90vw;max-height:85vh;border-radius:8px}
-.res-footer{background:#f2f2f2;border-top:1px solid #dadce0;margin-top:auto}
-</style>
+<link rel="stylesheet" href="css/variables.css">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/homepage.css">
+<link rel="stylesheet" href="css/results.css">
+<link rel="stylesheet" href="css/tabs.css">
+<link rel="stylesheet" href="css/appsmenu.css">
+<link rel="stylesheet" href="css/settings.css">
 </head>
 <body>
 
-<!-- ================= HOME ================= -->
-<div id="homeView">
-  <div class="topbar">
-    <a href="#" onclick="return fake('Gmail')">Gmail</a>
-    <a href="#" onclick="goTab('images');return false">Images</a>
-    <div class="apps-icon" title="Google apps" onclick="toast('Google apps — demo clone')">
-      <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
-    </div>
-    <div class="avatar" title="Google Account">G</div>
-  </div>
-  <div class="hero">
-    <div class="wordmark big" aria-label="Google"><span class="b">G</span><span class="r">o</span><span class="y">o</span><span class="b">g</span><span class="g">l</span><span class="r">e</span></div>
-    <div class="search-wrap">
-      <div class="search-box" id="homeBox">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9aa0a6" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="21" y2="21"/></svg>
-        <input id="homeInput" type="text" autocomplete="off" placeholder="" aria-label="Search">
-        <button class="icon-btn" title="Search by voice" onclick="toast('Voice search is not available in this demo')">
-          <svg width="22" height="22" viewBox="0 0 24 24"><path fill="#4285F4" d="M12 15a3 3 0 0 0 3-3V6a3 3 0 1 0-6 0v6a3 3 0 0 0 3 3z"/><path fill="#34A853" d="M17 11a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V21h2v-3.08A7 7 0 0 0 19 11h-2z"/></svg>
-        </button>
-        <button class="icon-btn" title="Search by image" onclick="toast('Google Lens is not available in this demo')">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="4.5" stroke="#EA4335" stroke-width="2"/><circle cx="13.8" cy="10.2" r="1.4" fill="#4285F4"/><path d="M4 8V5.5A1.5 1.5 0 0 1 5.5 4H8M16 4h2.5A1.5 1.5 0 0 1 20 5.5V8M20 16v2.5a1.5 1.5 0 0 1-1.5 1.5H16M8 20H5.5A1.5 1.5 0 0 1 4 18.5V16" stroke="#34A853" stroke-width="2" stroke-linecap="round"/></svg>
-        </button>
-      </div>
-      <div class="suggest" id="homeSuggest"></div>
-    </div>
-    <div class="home-buttons">
-      <button class="btn" onclick="submitHome()">Google Search</button>
-      <button class="btn" onclick="feelingLucky(document.getElementById('homeInput').value)">I'm Feeling Lucky</button>
-    </div>
-  </div>
-  <div class="footer"><div class="footer-inner">
-    <div><a href="#" onclick="return fake('About')">About</a><a href="#" onclick="return fake('Advertising')">Advertising</a><a href="#" onclick="return fake('Business')">Business</a><a href="#" onclick="return fake('How Search works')">How Search works</a></div>
-    <div><a href="#" onclick="return fake('Privacy')">Privacy</a><a href="#" onclick="return fake('Terms')">Terms</a><a href="#" onclick="return fake('Settings')">Settings</a></div>
-  </div></div>
-</div>
+<!-- inline SVG sprite (copy of assets/icons.svg; inlined so <use> works from file://) -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="21" y2="21"/></symbol>
+  <symbol id="i-mic" viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></symbol>
+  <symbol id="i-lens" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M4 8V5.5A1.5 1.5 0 0 1 5.5 4H8M16 4h2.5A1.5 1.5 0 0 1 20 5.5V8M20 16v2.5a1.5 1.5 0 0 1-1.5 1.5H16M8 20H5.5A1.5 1.5 0 0 1 4 18.5V16"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></symbol>
+  <symbol id="i-chev" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></symbol>
+  <symbol id="i-image" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="M3 17l5-4 4 3 4-4 5 5"/></symbol>
+  <symbol id="i-video" viewBox="0 0 24 24"><rect x="3" y="6" width="13" height="12" rx="2"/><path d="M16 10l5-3v10l-5-3"/></symbol>
+  <symbol id="i-news" viewBox="0 0 24 24"><path d="M4 6h13v12H6a2 2 0 0 1-2-2V6z"/><path d="M17 9h2a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1h-2M7 10h7M7 13.5h7"/></symbol>
+  <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21s-7-5.5-7-11a7 7 0 0 1 14 0c0 5.5-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></symbol>
+  <symbol id="i-settings" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19 12a7 7 0 0 0-.1-1.2l2-1.5-2-3.4-2.3 1a7 7 0 0 0-2-1.2L14.2 3h-4l-.4 2.7a7 7 0 0 0-2 1.2l-2.3-1-2 3.4 2 1.5A7 7 0 0 0 5 12c0 .4 0 .8.1 1.2l-2 1.5 2 3.4 2.3-1a7 7 0 0 0 2 1.2l.4 2.7h4l.4-2.7a7 7 0 0 0 2-1.2l2.3 1 2-3.4-2-1.5c.1-.4.1-.8.1-1.2z"/></symbol>
+  <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4 8.5 8.5 0 1 0 20 14.5z"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M4 4l16 16M20 4L4 20"/></symbol>
+  <symbol id="i-send" viewBox="0 0 24 24"><path d="M21 3L10 14M21 3l-7 18-4-7-7-4 18-7z"/></symbol>
+  <symbol id="i-chat" viewBox="0 0 24 24"><path d="M21 12a8 8 0 0 1-8 8H4l2-3a8 8 0 1 1 15-5z"/></symbol>
+  <symbol id="i-star" viewBox="0 0 24 24"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1-5.4-2.9-5.4 2.9 1-6.1L3.2 9.5l6.1-.9L12 3z"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2m3 0l-1 13a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1L6 7"/></symbol>
+  <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.7 3.8 9S14.5 18.4 12 21c-2.5-2.6-3.8-5.7-3.8-9S9.5 5.6 12 3z"/></symbol>
+</svg>
 
-<!-- ================= RESULTS ================= -->
+<!-- views (filled in by components) -->
+<div id="homeView"></div>
+
 <div id="resultsView">
-  <div class="res-header">
-    <div class="wordmark small" onclick="goHome()" aria-label="Google home"><span class="b">G</span><span class="r">o</span><span class="y">o</span><span class="b">g</span><span class="g">l</span><span class="r">e</span></div>
-    <div class="res-search">
-      <div class="res-box" id="resBox">
-        <input id="resInput" type="text" autocomplete="off" aria-label="Search">
-        <div class="res-icons">
-          <button class="clear-x" id="clearX" title="Clear" onclick="clearRes()">×</button>
-          <button class="icon-btn" title="Search by voice" onclick="toast('Voice search is not available in this demo')">
-            <svg width="22" height="22" viewBox="0 0 24 24"><path fill="#4285F4" d="M12 15a3 3 0 0 0 3-3V6a3 3 0 1 0-6 0v6a3 3 0 0 0 3 3z"/><path fill="#34A853" d="M17 11a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V21h2v-3.08A7 7 0 0 0 19 11h-2z"/></svg>
-          </button>
-          <button class="icon-btn" title="Search by image" onclick="toast('Google Lens is not available in this demo')">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="4.5" stroke="#EA4335" stroke-width="2"/><circle cx="13.8" cy="10.2" r="1.4" fill="#4285F4"/><path d="M4 8V5.5A1.5 1.5 0 0 1 5.5 4H8M16 4h2.5A1.5 1.5 0 0 1 20 5.5V8M20 16v2.5a1.5 1.5 0 0 1-1.5 1.5H16M8 20H5.5A1.5 1.5 0 0 1 4 18.5V16" stroke="#34A853" stroke-width="2" stroke-linecap="round"/></svg>
-          </button>
-          <button class="icon-btn" title="Search" onclick="submitRes()">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4285F4" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="21" y2="21"/></svg>
-          </button>
-        </div>
-      </div>
-      <div class="suggest" id="resSuggest"></div>
-    </div>
-  </div>
+  <div class="res-header" id="resHeader"></div>
   <div class="tabs" id="tabs"></div>
   <div class="res-body">
     <div class="res-main" id="resMain"></div>
     <div class="res-side" id="resSide"></div>
   </div>
-  <div class="footer res-footer"><div class="footer-inner">
-    <div><a href="#" onclick="return fake('About')">About</a><a href="#" onclick="return fake('Advertising')">Advertising</a><a href="#" onclick="return fake('Business')">Business</a><a href="#" onclick="return fake('How Search works')">How Search works</a></div>
-    <div><a href="#" onclick="return fake('Privacy')">Privacy</a><a href="#" onclick="return fake('Terms')">Terms</a><a href="#" onclick="return fake('Settings')">Settings</a></div>
-  </div></div>
+  <div id="resFooter"></div>
 </div>
 
-<!-- lucky overlay -->
-<div class="overlay" id="luckyOverlay" onclick="if(event.target===this)this.classList.remove('show')">
+<div id="historyView" style="display:none"></div>
+<div id="settingsView" style="display:none"></div>
+
+<!-- overlays -->
+<div class="overlay" id="luckyOverlay">
   <div class="lucky-panel" id="luckyPanel"></div>
 </div>
-<!-- image lightbox -->
-<div class="overlay" id="imgOverlay" onclick="this.classList.remove('show')">
-  <img class="lightbox-img" id="lightboxImg" alt="">
+<div class="overlay" id="imgOverlay">
+  <div><img class="lightbox-img" id="lightboxImg" alt=""><div class="lightbox-cap" id="lightboxCap"></div></div>
+</div>
+<div class="overlay" id="voiceOverlay">
+  <div class="voice-panel">
+    <div class="voice-mic"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#4285F4" stroke-width="2"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></div>
+    <p>Listening… (demo)</p>
+    <div class="heard" id="voiceHeard"></div>
+  </div>
 </div>
 <div id="toast"></div>
 
-<script>
-'use strict';
-/* ============================================================
-   Google clone — everything below is vanilla JS.
-   All "results" are generated locally from the query string
-   with a seeded PRNG, so the same query always gives the
-   same results (and pagination varies them deterministically).
-   ============================================================ */
-
-/* ---------- utils ---------- */
-function hashStr(s){let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return h>>>0}
-function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
-function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
-function escRe(s){return s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}
-/* bold every occurrence of the query (whole words, case-insensitive) */
-function boldQ(text,q){
-  const words=q.trim().split(/\s+/).filter(w=>w.length>1).sort((a,b)=>b.length-a.length);
-  let out=esc(text);
-  for(const w of words){out=out.replace(new RegExp('('+escRe(esc(w))+')','gi'),'<b>$1</b>')}
-  return out;
-}
-function titleCase(s){return s.replace(/\w\S*/g,t=>t.charAt(0).toUpperCase()+t.substr(1).toLowerCase())}
-function slugify(s){return s.toLowerCase().trim().replace(/[^a-z0-9]+/g,'').slice(0,18)||'search'}
-function fmt(n){return n.toLocaleString('en-US')}
-let toastT=null;
-function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.style.display='block';clearTimeout(toastT);toastT=setTimeout(()=>t.style.display='none',2200)}
-function fake(name){toast(name+' — demo clone');return false}
-
-/* ---------- state ---------- */
-const state={q:'',tab:'all',page:1};
-let recent=[]; // recent searches (memory + localStorage when available)
-try{recent=JSON.parse(localStorage.getItem('gclone_recent')||'[]')}catch(e){recent=[]}
-function saveRecent(){try{localStorage.setItem('gclone_recent',JSON.stringify(recent.slice(0,8)))}catch(e){}}
-function pushRecent(q){recent=[q,...recent.filter(r=>r.toLowerCase()!==q.toLowerCase())].slice(0,8);saveRecent()}
-
-/* ---------- result data generators ---------- */
-const FAV_COLORS=['#4285F4','#EA4335','#FBBC05','#34A853','#8e24aa','#0097a7','#ef6c00','#5c6bc0'];
-
-function makeResults(q,page){
-  const Q=titleCase(q), slug=slugify(q);
-  const rnd=mulberry32(hashStr(q+'|page'+page));
-  const pick=a=>a[Math.floor(rnd()*a.length)];
-  const domains=[
-    'www.'+slug+'guide.com', slug+'hub.io', 'docs.'+slug+'dev', 'blog.'+slug+'central.com',
-    'learn'+slug+'.org', 'www.howto'+slug+'.net', slug+'insider.com', 'community.'+slug+'talk.com',
-    slug+'.stacktips.dev', 'www.the'+slug+'post.com', 'academy.'+slug+'lab.io', 'news.'+slug+'wire.com'
-  ];
-  // shuffle domains deterministically
-  for(let i=domains.length-1;i>0;i--){const j=Math.floor(rnd()*(i+1));[domains[i],domains[j]]=[domains[j],domains[i]]}
-  const paths=['› guides › '+slug+'-basics','› '+slug+' › getting-started','› blog › '+slug+'-explained','› docs › '+slug+'-reference','› learn › '+slug+'-course','› '+slug+' › faq'];
-  const titles=[
-    ()=>Q+' — The Complete Beginner\u2019s Guide (2026)',
-    ()=>'What Is '+Q+'? Everything You Need to Know',
-    ()=>'10 Best '+Q+' Resources, Tools & Tutorials',
-    ()=>Q+' Explained: A Visual Introduction for Newcomers',
-    ()=>'How to Get Started with '+Q+' in 30 Minutes',
-    ()=>Q+' vs. the Alternatives: An Honest Comparison',
-    ()=>'The Official '+Q+' Documentation & API Reference',
-    ()=>'/r/'+slug+' — '+Q+' Community, Tips & Discussion',
-    ()=>Q+': 25 Expert Tips You Should Know in 2026',
-    ()=>'Understanding '+Q+' — Concepts, Examples & Use Cases',
-    ()=>Q+' News, Trends & In-Depth Analysis',
-    ()=>'Free '+Q+' Course: From Zero to Confident'
-  ];
-  const snippets=[
-    ()=>`From in-depth tutorials to official documentation, this guide covers everything about ${q}: what it is, how it works, and how to get started today. Includes worked examples, FAQs, and tips from experienced practitioners.`,
-    ()=>`Looking for ${q}? We compare the top-rated tools, resources, and services for ${q} in 2026 \u2014 with real user reviews, pricing breakdowns, and a checklist to help you choose with confidence.`,
-    ()=>`Learn ${q} step by step with interactive lessons and real-world projects. Join 120,000+ learners who started with this free ${q} course and finished with a portfolio-ready skill set.`,
-    ()=>`What exactly is ${q}, and why is everyone talking about it? This plain-English explainer breaks down ${q} into simple concepts, with diagrams and everyday analogies \u2014 no prior knowledge required.`,
-    ()=>`The community hub for ${q}: ask questions, share your work, and get feedback from thousands of ${q} enthusiasts. Daily threads cover troubleshooting, best practices, and new developments.`,
-    ()=>`Our editors tested every major ${q} option on the market. Here\u2019s the honest verdict on which ${q} solutions are worth your time \u2014 and which ones to skip.`,
-    ()=>`The official reference for ${q}, maintained by the core team. Browse the full ${q} documentation, API reference, migration guides, and release notes in one searchable place.`,
-    ()=>`Stay current with ${q}: breaking news, expert analysis, and long-form features from our ${q} desk. Updated daily by reporters who cover ${q} full-time.`,
-    ()=>`Struggling with ${q}? These 25 field-tested tips will save you hours. Covers common mistakes, hidden features, and pro workflows that most ${q} beginners miss.`,
-    ()=>`A hands-on walkthrough of ${q} from first principles. You\u2019ll build a working example, understand the key ideas behind ${q}, and know exactly what to learn next.`,
-    ()=>`Downloadable ${q} cheat sheet, templates, and checklists. Everything in this ${q} starter pack is free and designed to take you from curious to capable fast.`,
-    ()=>`Independent, ad-free reviews of ${q} products and services. Our methodology for evaluating ${q} is published openly so you can trust every score.`
-  ];
-  // deterministic shuffle of templates
-  const tIdx=titles.map((_,i)=>i), sIdx=snippets.map((_,i)=>i);
-  for(let i=tIdx.length-1;i>0;i--){const j=Math.floor(rnd()*(i+1));[tIdx[i],tIdx[j]]=[tIdx[j],tIdx[i]];[sIdx[i],sIdx[j]]=[sIdx[j],sIdx[i]]}
-  const out=[];
-  for(let i=0;i<8;i++){
-    const d=domains[i%domains.length];
-    out.push({
-      name:d.replace(/^www\./,'').split('.')[0].replace(/-/g,' ').replace(/\b\w/g,c=>c.toUpperCase()),
-      url:'https://'+d,
-      crumb:'https://'+d+' '+pick(paths),
-      title:titles[tIdx[i%tIdx.length]](),
-      snip:snippets[sIdx[i%sIdx.length]](),
-      fav:d.replace(/^www\./,'').charAt(0).toUpperCase(),
-      color:FAV_COLORS[hashStr(d)%FAV_COLORS.length]
-    });
-  }
-  return out;
-}
-
-function makePAA(q){
-  const Q=titleCase(q);
-  return [
-    {q:'What is '+q+'?',a:q+' is a widely searched topic covering guides, tools, and community resources. In short, most people look up '+q+' when they want to understand what it is, how it works, and how to get started \u2014 this page collects the best explanations in one place.'},
-    {q:'How does '+q+' work?',a:'At a high level, '+q+' works through a set of core concepts that build on each other. The guides linked above walk through each part step by step, with examples you can follow along with in under an hour.'},
-    {q:'Is '+q+' free to use?',a:'Many '+q+' resources are free, including community tutorials, documentation, and open-source tools. Some advanced '+q+' products offer paid tiers \u2014 the comparison guides above break down exactly what you get at each price point.'},
-    {q:'What is '+q+' used for?',a:'People use '+q+' for learning, building projects, and staying current with new developments. The most common use cases are covered in the beginner\u2019s guide and the expert-tips article in the results above.'}
-  ];
-}
-
-function makeKnowledge(q){
-  const Q=titleCase(q), slug=slugify(q);
-  return {
-    title:Q, sub:'Topic \u00B7 Frequently searched term',
-    img:'https://picsum.photos/seed/'+slug+'-knowledge/680/360',
-    desc:'\u201C'+q+'\u201D is a popular search topic spanning tutorials, documentation, tools, and community discussion. Search interest in '+q+' has grown steadily as more guides, courses, and expert coverage become available. The results on this page collect the most useful '+q+' resources in one place.',
-    facts:[['Category','Reference & learning'],['Also searched',q+' tutorial \u00B7 '+q+' guide \u00B7 '+q+' examples'],['Content types','Guides, videos, news, docs'],['Updated','September 2026']]
-  };
-}
-
-function makeRelated(q){
-  const Q=titleCase(q);
-  return [Q+' tutorial',Q+' for beginners','what is '+q,Q+' vs alternatives','best '+q+' tools','free '+q+' course',Q+' documentation',Q+' examples'];
-}
-
-/* ---------- rendering ---------- */
-const TABS=[['all','All'],['images','Images'],['videos','Videos'],['news','News'],['maps','Maps'],['more','More']];
-function renderTabs(){
-  document.getElementById('tabs').innerHTML=TABS.map(([id,label])=>
-    `<div class="tab${state.tab===id?' active':''}" onclick="setTab('${id}')">${label}</div>`).join('');
-}
-function setTab(id){
-  if(id==='more'){toast('More: Shopping, Books, Flights — demo clone');return}
-  if(id==='maps'){state.tab=id;renderTabs();renderMaps();return}
-  state.tab=id;state.page=1;renderTabs();render();
-}
-function goHome(){
-  document.getElementById('resultsView').style.display='none';
-  document.getElementById('homeView').style.display='flex';
-  document.getElementById('homeInput').value='';document.title='Google';
-}
-function goTab(tab){ // from homepage "Images" link: needs a query first
-  const q=document.getElementById('homeInput').value.trim();
-  if(!q){toast('Type something to search first');return}
-  doSearch(q,tab);
-}
-
-function doSearch(q,tab){
-  q=q.trim();if(!q)return;
-  state.q=q;state.tab=tab||'all';state.page=1;
-  pushRecent(q);
-  document.getElementById('homeView').style.display='none';
-  const rv=document.getElementById('resultsView');rv.style.display='flex';
-  document.getElementById('resInput').value=q;
-  document.title=q+' - Google Search';
-  renderTabs();render();
-  window.scrollTo(0,0);
-}
-function render(){
-  if(state.tab==='all')renderAll();
-  else if(state.tab==='images')renderImages();
-  else if(state.tab==='videos')renderVideos();
-  else if(state.tab==='news')renderNews();
-  document.getElementById('resSide').innerHTML=(state.tab==='all')?renderKnowledge(state.q):'';
-}
-
-function renderAll(){
-  const q=state.q,rnd=mulberry32(hashStr(q+'|stats'));
-  const count=Math.floor(180000+rnd()*4800000);
-  const secs=(0.21+rnd()*0.5).toFixed(2);
-  const results=makeResults(q,state.page);
-  const paa=makePAA(q),rel=makeRelated(q);
-  let h=`<div class="stats">About ${fmt(count)} results (${secs} seconds)</div>`;
-  h+=results.map(r=>`
-    <div class="result">
-      <div class="res-site"><div class="fav" style="background:${r.color}">${esc(r.fav)}</div>
-        <div><div class="name">${esc(r.name)}</div><div class="url">${esc(r.crumb)}</div></div></div>
-      <a class="res-title" href="#" onclick="return fake('${esc(r.name)}')">${boldQ(r.title,q)}</a>
-      <div class="res-snip">${boldQ(r.snip,q)}</div>
-    </div>`).join('');
-  h+=`<div class="paa"><h2>People also ask</h2>${paa.map((p,i)=>`
-    <div class="paa-row" id="paa${i}">
-      <div class="paa-q" onclick="document.getElementById('paa${i}').classList.toggle('open')">
-        <span>${esc(p.q)}</span><span class="chev"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></span>
-      </div><div class="paa-a">${esc(p.a)}</div>
-    </div>`).join('')}</div>`;
-  h+=`<div class="related"><h3>Searches related to ${esc(q)}</h3><div class="related-grid">`+
-    rel.map(r=>`<a href="#" onclick="doSearch('${esc(r).replace(/'/g,"\\'")}');return false">${boldQ(r,q)}</a>`).join('')+
-    `</div></div>`;
-  h+=renderPager();
-  document.getElementById('resMain').innerHTML=h;
-}
-function renderKnowledge(q){
-  const k=makeKnowledge(q);
-  return `<div class="kcard"><img class="kimg" src="${k.img}" alt="${esc(q)}" loading="lazy">
-    <div class="kcard-body"><h2>${esc(k.title)}</h2><div class="sub">${esc(k.sub)}</div>
-    <p>${esc(k.desc)}</p>
-    ${k.facts.map(f=>`<div class="kfact"><span class="k">${esc(f[0])}:</span><span class="v">${esc(f[1])}</span></div>`).join('')}
-    </div></div>`;
-}
-/* Goooooooooogle pagination */
-function renderPager(){
-  const cur=state.page;
-  const letters=[['G','#4285F4'],['o','#EA4335']];
-  for(let i=0;i<9;i++)letters.push(['o','#FBBC05']); // 10 numbered letters total
-  letters.push(['g','#4285F4'],['l','#34A853'],['e','#EA4335']);
-  let h='<div class="pager">';
-  letters.forEach((L,i)=>{
-    if(i===0){h+='<div class="pg"><span class="gl" style="color:'+L[1]+'">'+L[0]+'</span><span class="n"></span></div>';return}
-    if(i>10){h+='<div class="pg"><span class="gl" style="color:'+L[1]+'">'+L[0]+'</span><span class="n"></span></div>';return}
-    const cls=i===cur?'pg cur':'pg';
-    const click=i===cur?'':'onclick="gotoPage('+i+')"';
-    h+='<div class="'+cls+'" '+click+'><span class="gl" style="color:'+L[1]+'">'+L[0]+'</span><span class="n">'+i+'</span></div>';
-  });
-  return h+'</div>';
-}
-function gotoPage(p){state.page=Math.min(10,Math.max(1,p));render();window.scrollTo(0,0)}
-
-function renderImages(){
-  const q=state.q,slug=slugify(q),rnd=mulberry32(hashStr(q+'|img'));
-  let h=`<div class="stats">About ${fmt(Math.floor(50000+rnd()*900000))} image results (${(0.3+rnd()*0.4).toFixed(2)} seconds)</div><div class="img-grid">`;
-  for(let i=0;i<24;i++){
-    const seed=slug+'-'+i;
-    h+=`<div class="img-card" onclick="openLightbox('https://picsum.photos/seed/${seed}/900/600')">
-      <img src="https://picsum.photos/seed/${seed}/300/200" alt="${esc(q)}" loading="lazy">
-      <div class="cap">${esc(titleCase(q))} — photo ${i+1}</div></div>`;
-  }
-  document.getElementById('resMain').innerHTML=h+'</div>';
-}
-function openLightbox(src){document.getElementById('lightboxImg').src=src;document.getElementById('imgOverlay').classList.add('show')}
-
-function renderVideos(){
-  const q=state.q,Q=titleCase(q),slug=slugify(q),rnd=mulberry32(hashStr(q+'|vid'));
-  const chans=['LearnFast','The Daily Explain','Studio North','Deep Dive','BrightPath','Field Notes'];
-  const titles=[Q+' Explained in 10 Minutes', 'I Tried '+Q+' for 30 Days — Here\u2019s What Happened',
-    'The Untold Story of '+Q, Q+' for Absolute Beginners (Full Course)',
-    'Top 7 '+Q+' Mistakes to Avoid', 'Why Everyone Is Talking About '+Q,
-    Q+': Advanced Techniques', 'Live Q&A — Your '+Q+' Questions Answered'];
-  const ago=['2 hours ago','8 hours ago','1 day ago','3 days ago','1 week ago','2 weeks ago','1 month ago','3 months ago'];
-  let h=`<div class="stats">About ${fmt(Math.floor(20000+rnd()*300000))} video results</div>`;
-  titles.forEach((t,i)=>{
-    const dur=Math.floor(rnd()*50)+3, sec=Math.floor(rnd()*60);
-    const views=rnd()>0.5?(rnd()*9+0.2).toFixed(1)+'M views':Math.floor(rnd()*800+20)+'K views';
-    h+=`<div class="vid-card" onclick="return fake('Video player')">
-      <div class="vid-thumb"><img src="https://picsum.photos/seed/${slug}-vid${i}/440/248" alt="" loading="lazy">
-      <span class="vid-dur">${dur}:${String(sec).padStart(2,'0')}</span></div>
-      <div><div class="vid-title">${boldQ(t,q)}</div>
-      <div class="vid-meta">${chans[i%chans.length]} · ${views} · ${ago[i%ago.length]}<br>
-      ${boldQ('A clear, practical look at '+q+' — what matters, what doesn\u2019t, and where to go next.',q)}</div></div></div>`;
-  });
-  document.getElementById('resMain').innerHTML=h;
-}
-
-function renderNews(){
-  const q=state.q,Q=titleCase(q),rnd=mulberry32(hashStr(q+'|news'));
-  const srcs=['The '+Q+' Times', Q+' Daily','TechWire','Morning Brief','The Ledger','Pulse News'];
-  const heads=['Breaking: Major New Development in '+Q,'Why '+Q+' Is Having a Moment Right Now',
-    'Experts Weigh In on the Future of '+Q,'New Report Sheds Light on '+Q+' Trends',
-    'What Today\u2019s '+Q+' Announcement Means for You','Inside the Growing '+Q+' Community'];
-  const times=['32 minutes ago','2 hours ago','5 hours ago','9 hours ago','Yesterday','2 days ago'];
-  const snips=[
-    ()=>`In a widely anticipated update, new ${q} guidance was released today, drawing reactions from across the industry. Analysts say the move could reshape how people approach ${q} in the months ahead.`,
-    ()=>`${Q} continues to dominate the conversation this week. We spoke with experts to understand what\u2019s driving the surge of interest in ${q} \u2014 and what comes next.`,
-    ()=>`A new report on ${q} highlights key trends, surprising statistics, and what they mean for beginners and professionals alike. Here are the five takeaways that matter most.`,
-    ()=>`Community reactions to the latest ${q} news have been swift. Here\u2019s a clear-eyed look at what actually changed, what didn\u2019t, and why it matters for anyone following ${q}.`,
-    ()=>`From policy shifts to product launches, ${q} had a busy week. Our correspondents break down the stories worth your attention \u2014 in five minutes or less.`,
-    ()=>`Long dismissed as a niche interest, ${q} is going mainstream. This feature explores the people, ideas, and moments behind ${q}\u2019s rise.`
-  ];
-  let h=`<div class="stats">About ${fmt(Math.floor(8000+rnd()*120000))} news results</div>`;
-  heads.forEach((t,i)=>{
-    const s=srcs[i%srcs.length];
-    h+=`<div class="news-card">
-      <div class="news-src"><div class="fav" style="background:${FAV_COLORS[i%FAV_COLORS.length]};width:22px;height:22px;font-size:11px">${esc(s.charAt(0))}</div>
-      <span>${esc(s)}</span><span class="news-time"> · ${times[i%times.length]}</span></div>
-      <a class="res-title" href="#" onclick="return fake('${esc(s)}')">${boldQ(t,q)}</a>
-      <div class="res-snip">${boldQ(snips[i%snips.length](),q)}</div></div>`;
-  });
-  document.getElementById('resMain').innerHTML=h;
-}
-
-function renderMaps(){
-  document.getElementById('resMain').innerHTML=
-    `<div class="stats">Places related to "${esc(state.q)}"</div>
-     <div class="kcard" style="margin:20px 0;max-width:650px"><div class="kcard-body">
-     <h2 style="font-size:20px">🗺️ Maps preview</h2>
-     <p style="margin-top:8px">This demo clone doesn\u2019t include real map tiles, but a full build would show
-     places matching <b>${esc(state.q)}</b> here — with pins, ratings, and directions — powered by an open
-     map stack like OpenStreetMap + Leaflet.</p></div></div>`;
-}
-
-/* ---------- I'm Feeling Lucky ---------- */
-function feelingLucky(q){
-  q=(q||'').trim();
-  if(!q){const box=document.getElementById('homeBox');box.classList.remove('shake');void box.offsetWidth;box.classList.add('shake');return}
-  const rnd=mulberry32(hashStr('lucky|'+q));
-  const dests=[
-    ()=>`<b>https://www.${slugify(q)}guide.com/${slugify(q)}-basics</b><br>The internet\u2019s friendliest ${q} guide — straight to the good part, no scrolling required.`,
-    ()=>`<b>https://${slugify(q)}hub.io</b><br>The community wiki for ${q}. 4,096 articles and counting. You\u2019ll fit right in.`,
-    ()=>`<b>https://docs.${slugify(q)}dev</b><br>Official ${q} documentation. You look like someone who reads the manual. Respect.`,
-    ()=>`<b>https://www.howto${slugify(q)}.net</b><br>A 30-minute interactive ${q} crash course. Lucky you — it\u2019s free today.`
-  ];
-  document.getElementById('luckyPanel').innerHTML=
-    `<div class="clover">🍀</div><h2>You\u2019re feeling lucky!</h2>
-     <p>We skipped the results page and took you straight to the best corner of the internet for</p>
-     <p style="font-size:18px;color:#202124"><b>“${esc(q)}”</b></p>
-     <div class="dest">${dests[Math.floor(rnd()*dests.length)]()}</div>
-     <button class="btn" onclick="document.getElementById('luckyOverlay').classList.remove('show');doSearch('${esc(q).replace(/'/g,"\\'")}')">Show me the results anyway</button>
-     <div style="margin-top:10px"><a href="#" style="color:#1a0dab;font-size:13px" onclick="document.getElementById('luckyOverlay').classList.remove('show');return false">Take me back</a></div>`;
-  document.getElementById('luckyOverlay').classList.add('show');
-}
-
-/* ---------- search box wiring: submit, shake, suggestions ---------- */
-function submitHome(){
-  const inp=document.getElementById('homeInput'),box=document.getElementById('homeBox');
-  if(!inp.value.trim()){box.classList.remove('shake');void box.offsetWidth;box.classList.add('shake');return}
-  doSearch(inp.value);
-}
-function submitRes(){
-  const inp=document.getElementById('resInput'),box=document.getElementById('resBox');
-  if(!inp.value.trim()){box.classList.remove('shake');void box.offsetWidth;box.classList.add('shake');return}
-  doSearch(inp.value,state.tab==='maps'?'all':state.tab);
-}
-function clearRes(){document.getElementById('resInput').value='';document.getElementById('resInput').focus()}
-
-function wireSuggest(inputId,boxId,ddId,onPick){
-  const inp=document.getElementById(inputId),box=document.getElementById(boxId),dd=document.getElementById(ddId);
-  const show=()=>{
-    const v=inp.value.trim();
-    const recents=recent.filter(r=>!v||r.toLowerCase().includes(v.toLowerCase())).slice(0,4);
-    const sugg=v?[v+' tutorial',v+' for beginners','what is '+v,v+' vs alternatives'].filter(s=>s.toLowerCase()!==v.toLowerCase()):[];
-    if(!recents.length&&!sugg.length){dd.style.display='none';box.classList.remove('open');return}
-    dd.innerHTML=
-      recents.map(r=>`<div class="suggest-row recent" data-q="${esc(r)}">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
-        <span>${esc(r)}</span><span class="lbl">recent</span></div>`).join('')+
-      sugg.map(s=>`<div class="suggest-row" data-q="${esc(s)}">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9aa0a6" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="21" y2="21"/></svg>
-        <span>${boldQ(s,v)}</span></div>`).join('');
-    dd.style.display='block';box.classList.add('open');
-    dd.querySelectorAll('.suggest-row').forEach(row=>{
-      row.addEventListener('mousedown',e=>{e.preventDefault();onPick(row.dataset.q)});
-    });
-  };
-  const hide=()=>{setTimeout(()=>{dd.style.display='none';box.classList.remove('open')},150)};
-  inp.addEventListener('focus',show);
-  inp.addEventListener('input',show);
-  inp.addEventListener('blur',hide);
-}
-wireSuggest('homeInput','homeBox','homeSuggest',q=>{document.getElementById('homeInput').value=q;submitHome()});
-wireSuggest('resInput','resBox','resSuggest',q=>{document.getElementById('resInput').value=q;submitRes()});
-document.getElementById('homeInput').addEventListener('keydown',e=>{if(e.key==='Enter')submitHome()});
-document.getElementById('resInput').addEventListener('keydown',e=>{if(e.key==='Enter')submitRes()});
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){document.getElementById('luckyOverlay').classList.remove('show');document.getElementById('imgOverlay').classList.remove('show')}});
-</script>
+<!-- scripts: classic (file:// safe, no modules), dependency order -->
+<script src="js/utils/format.js"></script>
+<script src="js/utils/dom.js"></script>
+<script src="js/data/webindex.js"></script>
+<script src="js/data/suggestions.js"></script>
+<script src="js/data/news.js"></script>
+<script src="js/store.js"></script>
+<script src="js/search/engine.js"></script>
+<script src="js/search/knowledge.js"></script>
+<script src="js/search/related.js"></script>
+<script src="js/components/searchbox.js"></script>
+<script src="js/components/homepage.js"></script>
+<script src="js/components/lucky.js"></script>
+<script src="js/components/results.js"></script>
+<script src="js/components/tabs.js"></script>
+<script src="js/components/appsmenu.js"></script>
+<script src="js/components/settings.js"></script>
+<script src="js/components/history.js"></script>
+<script src="js/app.js"></script>
 </body>
 </html>
