@@ -22,22 +22,7 @@ G.Searchbox = (function(){
     '</div>';
   }
 
-  function suggestionsFor(v){
-    const q = v.trim().toLowerCase();
-    const recents = G.store.recentQueries(v, 4);
-    let sugg = [];
-    if (q){
-      sugg = (G.SUGGESTIONS || [])
-        .filter(s => s.startsWith(q) && s !== q)
-        .slice(0, 6);
-      // always offer the literal query first
-      if (!sugg.includes(q)) sugg.unshift(q);
-      sugg = sugg.slice(0, 7);
-    } else {
-      sugg = (G.SUGGESTIONS || []).slice(0, 6); // trending when empty
-    }
-    return { recents, sugg, trending: !q };
-  }
+  let _sugTok = 0;
 
   function mount(prefix, onSubmit){
     const inp = G.dom.$(prefix + 'Input');
@@ -45,9 +30,21 @@ G.Searchbox = (function(){
     const dd  = G.dom.$(prefix + 'Suggest');
     const esc = G.dom.esc;
 
-    const show = () => {
+    const show = async () => {
+      const my = ++_sugTok;
       const v = inp.value;
-      const { recents, sugg, trending } = suggestionsFor(v);
+      const recents = G.store.recentQueries(v, 4);
+      const q = v.trim().toLowerCase();
+      // completions now come from the server index (popular queries boost ranking)
+      let sugg, trending;
+      if (q){
+        sugg = await G.Engine.suggest(v);
+        trending = false;
+      } else {
+        sugg = await G.Engine.trending();
+        trending = true;
+      }
+      if (my !== _sugTok) return; // stale keystroke — a newer request won
       if (!recents.length && !sugg.length){ dd.style.display = 'none'; box.classList.remove('open'); return; }
       dd.innerHTML =
         recents.map(r =>
